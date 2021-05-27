@@ -1,4 +1,7 @@
 import wx
+from wx import FileDialog
+
+from CreateJobs import CreateJobs
 
 
 class Jobs(wx.Panel):
@@ -15,6 +18,8 @@ class Jobs(wx.Panel):
         v_box = wx.BoxSizer(wx.VERTICAL)
         self.create_button = wx.Button(self, label="新建任务")
         self.delete_button = wx.Button(self, label="删除任务")
+        self.create_button.Bind(wx.EVT_BUTTON, self.create_jobs)
+        self.delete_button.Bind(wx.EVT_BUTTON, self.delete_jobs)
         v_box.Add(self.create_button)
         v_box.Add(self.delete_button)
         h_box.Add(v_box, 0, wx.ALIGN_CENTER_VERTICAL)
@@ -22,3 +27,11 @@ class Jobs(wx.Panel):
         jobs_box_sizer.Add(h_box, 1, wx.EXPAND)
 
         self.SetSizer(jobs_box_sizer)
+
+    def create_jobs(self, event):
+        chgdep = CreateJobs(self)
+        chgdep.ShowModal()
+
+    def delete_jobs(self, event):
+        file = FileDialog(self, message="选择单个文件", style=wx.FD_OPEN)
+        file.ShowModal()
