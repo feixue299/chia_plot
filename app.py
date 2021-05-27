@@ -1,29 +1,37 @@
 import wx
 
-
-def load(event):
-    file = open(fileName.GetValue())
-    fileContent.SetValue(file.read())
-    file.close()
+from Jobs import Jobs
 
 
-def save(event):
-    file = open(fileName.GetValue(), 'w')
-    file.write(fileContent.GetValue())
-    file.close()
+class Panel(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent=parent, id=-1)
+        v_box = wx.BoxSizer(wx.VERTICAL)
+        jobs_panel = Jobs(self)
+
+        v_box.Add(jobs_panel, 0, wx.EXPAND)
+
+        self.SetSizer(v_box)
 
 
-app = wx.App()
-win = wx.Frame(None, title="Chia Plot")
-win.Show()
-
-openButton = wx.Button(win, label='Open', pos=(225, 5), size=(80, 25))
-openButton.Bind(wx.EVT_BUTTON, load)
-saveButton = wx.Button(win, label='Save', pos=(315, 5), size=(80, 25))
-saveButton.Bind(wx.EVT_BUTTON, save)
-
-fileName = wx.TextCtrl(win, pos=(5, 5), size=(210, 25))
-fileContent = wx.TextCtrl(win, pos=(5, 35), size=(390, 260), style=wx.TE_MULTILINE | wx.HSCROLL)
+class Frame(wx.Frame):
+    def __init__(self):
+        wx.Frame.__init__(self, parent=None, title=u'chia', size=(1000, 600),
+                          style=wx.DEFAULT_FRAME_STYLE ^ wx.MAXIMIZE_BOX)
+        panel = Panel(self)
+        self.Centre()
+        panel.Fit()
+        self.Show()
 
 
-app.MainLoop()
+class App(wx.App):
+    def OnInit(self):
+        frame = Frame()
+        frame.Show()
+        self.SetTopWindow(frame)
+        return True
+
+
+if __name__ == '__main__':
+    app = App()
+    app.MainLoop()
