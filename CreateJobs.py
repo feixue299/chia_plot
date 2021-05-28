@@ -1,4 +1,6 @@
-import sys
+import os
+import platform
+import re
 
 import wx
 
@@ -7,14 +9,17 @@ class CreateJobs(wx.Dialog):
     def __init__(self, *args, **kwargs):
         super(CreateJobs, self).__init__(*args, **kwargs)
         self.init_ui()
-        self.SetSize((800, 600))
+        # self.SetSize((800, 600))
         self.SetTitle("新建任务")
 
     def init_ui(self):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         plot_info = PlotInfo(self)
-        vbox.Add(plot_info, flag=wx.ALIGN_CENTER)
+        vbox.Add(plot_info, 0, wx.EXPAND)
+
+        wallet = Wallet(self)
+        vbox.Add(wallet, 0, wx.EXPAND)
 
         h_box = wx.BoxSizer(wx.HORIZONTAL)
         ok_button = wx.Button(self, label='Ok')
@@ -27,10 +32,12 @@ class CreateJobs(wx.Dialog):
 
         self.SetSizer(vbox)
 
-        ok_button.Bind(wx.EVT_BUTTON, self.OnClose)
-        close_button.Bind(wx.EVT_BUTTON, self.OnClose)
+        ok_button.Bind(wx.EVT_BUTTON, self.on_close)
+        close_button.Bind(wx.EVT_BUTTON, self.on_close)
 
-    def OnClose(self, e):
+        self.Fit()
+
+    def on_close(self, e):
         self.Close()
 
 
@@ -60,5 +67,40 @@ class PlotInfo(wx.Panel):
         plot_box_sizer.Add(grid_box)
         self.SetSizer(plot_box_sizer)
 
-    def on_radio_group(self, e):
-        pass
+
+class Wallet(wx.Panel):
+    def __init__(self, parent):
+        super(Wallet, self).__init__(parent)
+
+        wallet_box = wx.StaticBox(self, label="钱包信息")
+        wallet_box_sizer = wx.StaticBoxSizer(wallet_box, wx.HORIZONTAL)
+
+        wallet_text_ctrl = wx.TextCtrl(self)
+        default_button = wx.Button(self, label="自动获取钱包")
+        custom_button = wx.Button(self, label="选择钱包")
+
+        default_button.Bind(wx.EVT_BUTTON, self.auto_get_wallte)
+
+        wallet_box_sizer.Add(wallet_text_ctrl, 1, wx.EXPAND)
+        wallet_box_sizer.Add(default_button, 0)
+        wallet_box_sizer.Add(custom_button, 0)
+
+        self.SetSizer(wallet_box_sizer)
+
+    def auto_get_wallte(self, e):
+        if platform.system().lower() == 'windows':
+            print("windows")
+            cmd = "~\\AppData\\Local\\chia-blockchain\\app-?.?.?\\resources\\app.asar.unpacked\\daemon\\chia.exe" \
+                  "keys show"
+        else:
+            print("mac os")
+            cmd = "/Applications/Chia.app/Contents/Resources/app.asar.unpacked/daemon/chia keys show"
+        cmd_resp = os.popen(cmd)
+        read = cmd_resp.read()
+        match_object = re.match(r'Farmer public key (.*)', read, re.M | re.I)
+        if match_object:
+            print("matchObj.group() : ", match_object.group())
+            print("matchObj.group(1) : ", match_object.group(1))
+            print("matchObj.group(2) : ", match_object.group(2))
+        else:
+            print("no match")

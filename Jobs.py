@@ -29,8 +29,8 @@ class Jobs(wx.Panel):
         self.SetSizer(jobs_box_sizer)
 
     def create_jobs(self, event):
-        chgdep = CreateJobs(self)
-        chgdep.ShowModal()
+        create_jobs = CreateJobs(self)
+        create_jobs.ShowModal()
 
     def delete_jobs(self, event):
         file = FileDialog(self, message="选择单个文件", style=wx.FD_OPEN)
