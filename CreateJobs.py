@@ -4,6 +4,8 @@ import re
 
 import wx
 
+from PlotModel import PlotModel
+
 
 class CreateJobs(wx.Dialog):
     def __init__(self, *args, **kwargs):
