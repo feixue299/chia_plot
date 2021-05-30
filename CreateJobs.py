@@ -4,30 +4,28 @@ import re
 
 import wx
 
-from PlotModel import PlotModel
+from PlotModel import PlotModel, ProgressInterval, TimeInterval
 
 
 class CreateJobs(wx.Dialog):
     def __init__(self, *args, **kwargs):
         super(CreateJobs, self).__init__(*args, **kwargs)
-        self.init_ui()
-        # self.SetSize((800, 600))
+        self.model = PlotModel()
         self.SetTitle("新建任务")
 
-    def init_ui(self):
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        plot_info = PlotInfo(self)
-        vbox.Add(plot_info, 0, wx.EXPAND)
+        self.plot_info = PlotInfo(self)
+        vbox.Add(self.plot_info, 0, wx.EXPAND)
 
-        wallet = Wallet(self)
-        vbox.Add(wallet, 0, wx.EXPAND)
+        self.wallet = Wallet(self)
+        vbox.Add(self.wallet, 0, wx.EXPAND)
 
-        plot_parameter = PlottingParameters(self)
-        vbox.Add(plot_parameter, 0, wx.EXPAND)
+        self.plot_parameter = PlottingParameters(self)
+        vbox.Add(self.plot_parameter, 0, wx.EXPAND)
 
-        directories = Directories(self)
-        vbox.Add(directories, 0, wx.EXPAND)
+        self.directories = Directories(self)
+        vbox.Add(self.directories, 0, wx.EXPAND)
 
         h_box = wx.BoxSizer(wx.HORIZONTAL)
         ok_button = wx.Button(self, label='Ok')
@@ -40,13 +38,26 @@ class CreateJobs(wx.Dialog):
 
         self.SetSizer(vbox)
 
-        ok_button.Bind(wx.EVT_BUTTON, self.on_close)
+        ok_button.Bind(wx.EVT_BUTTON, self.on_ok)
         close_button.Bind(wx.EVT_BUTTON, self.on_close)
 
         self.Fit()
 
     def on_close(self, e):
         self.Close()
+
+    def on_ok(self, e):
+        try:
+            self.model.plot_total = int(self.plot_info.plot_total_text_ctrl.Value)
+            self.model.plotting_number = int(self.plot_info.plotting_total_text_ctrl.Value)
+            self.model.launch_interval = int(self.plot_info.launch_interval_text_ctrl.Value)
+            self.model.interval_type = TimeInterval if self.plot_info.time_radio_button.Value else ProgressInterval
+            if self.model.check():
+                wx.MessageBox("提示", "信息完整", wx.OK | wx.ICON_INFORMATION)
+            else:
+                wx.MessageBox("提示", "信息不完整", wx.OK | wx.ICON_INFORMATION)
+        except ValueError as error:
+            wx.MessageBox("提示", str(error), wx.OK | wx.ICON_INFORMATION)
 
 
 class PlotInfo(wx.Panel):
@@ -58,17 +69,26 @@ class PlotInfo(wx.Panel):
 
         grid_box = wx.GridSizer(2, 4, 5, 5)
 
-        for title in ["锄地总数", "总P盘总数", "启动间隔"]:
-            text = wx.StaticText(self, label=title)
-            text_ctrl = wx.TextCtrl(self)
-            grid_box.Add(text)
-            grid_box.Add(text_ctrl)
+        text = wx.StaticText(self, label="锄地总数")
+        self.plot_total_text_ctrl = wx.TextCtrl(self)
+        grid_box.Add(text)
+        grid_box.Add(self.plot_total_text_ctrl)
 
-        time_radio_button = wx.RadioButton(self, label="时间间隔(分钟)")
-        progress_radio_button = wx.RadioButton(self, label="进度间隔(%)")
+        text = wx.StaticText(self, label="总P盘总数")
+        self.plotting_total_text_ctrl = wx.TextCtrl(self)
+        grid_box.Add(text)
+        grid_box.Add(self.plotting_total_text_ctrl)
 
-        grid_box.Add(time_radio_button)
-        grid_box.Add(progress_radio_button)
+        text = wx.StaticText(self, label="启动间隔")
+        self.launch_interval_text_ctrl = wx.TextCtrl(self)
+        grid_box.Add(text)
+        grid_box.Add(self.launch_interval_text_ctrl)
+
+        self.time_radio_button = wx.RadioButton(self, label="时间间隔(分钟)")
+        self.progress_radio_button = wx.RadioButton(self, label="进度间隔(%)")
+
+        grid_box.Add(self.time_radio_button)
+        grid_box.Add(self.progress_radio_button)
 
         plot_box_sizer.Add(grid_box)
         self.SetSizer(plot_box_sizer)
