@@ -1,7 +1,12 @@
+import json
+import os
+
 import wx
 from wx import FileDialog
 
 from CreateJobs import CreateJobs
+from JobsModel import JobsModel
+from PlotModel import PlotModel
 
 
 class Jobs(wx.Panel):
@@ -12,8 +17,23 @@ class Jobs(wx.Panel):
         jobs_box_sizer = wx.StaticBoxSizer(jobs_box, wx.HORIZONTAL)
 
         h_box = wx.BoxSizer(wx.HORIZONTAL)
-        job_list = wx.ListCtrl(self, -1, style=wx.LC_REPORT)
-        h_box.Add(job_list, 1)
+
+        self.job_list = wx.ListCtrl(self, -1, style=wx.LC_REPORT)
+        self.job_list.InsertColumn(0, "序号")
+        self.job_list.InsertColumn(1, "缓存磁盘")
+        self.job_list.InsertColumn(2, "缓存磁盘2")
+        self.job_list.InsertColumn(3, "最终磁盘")
+        self.job_list.InsertColumn(4, "并发数")
+        self.job_list.InsertColumn(5, "并发中")
+        self.job_list.InsertColumn(6, "线程数")
+        self.job_list.InsertColumn(7, "内存大小")
+        self.job_list.InsertColumn(8, "待锄地数量")
+        self.job_list.InsertColumn(9, "已进行锄地数量")
+        self.job_list.InsertColumn(10, "指纹")
+        self.job_list.InsertColumn(11, "农场公钥")
+        self.job_list.InsertColumn(12, "矿池公钥")
+
+        h_box.Add(self.job_list, 1)
 
         v_box = wx.BoxSizer(wx.VERTICAL)
         self.create_button = wx.Button(self, label="新建任务")
@@ -27,6 +47,7 @@ class Jobs(wx.Panel):
         jobs_box_sizer.Add(h_box, 1, wx.EXPAND)
 
         self.SetSizer(jobs_box_sizer)
+        self.update_jobs()
 
     def create_jobs(self, event):
         create_jobs = CreateJobs(self)
@@ -35,3 +56,25 @@ class Jobs(wx.Panel):
     def delete_jobs(self, event):
         file = FileDialog(self, message="选择单个文件", style=wx.FD_OPEN)
         file.ShowModal()
+
+    def update_jobs(self):
+        path = "config.json"
+        try:
+            if os.path.exists(path):
+                with open(path, "r") as f:
+                    read = f.read()
+                    load_dir = json.loads(read)
+                    print("load_dir:", load_dir)
+                    jobs_model: JobsModel = json.loads(read, object_hook=lambda d: PlotModel(**d))
+                    print("jobs_model.jobs:", jobs_model.jobs)
+            else:
+                self.createFile(path)
+        finally:
+            pass
+
+    def createFile(self, path):
+        with open(path, "w+") as f:
+            json.dump(JobsModel().__dict__, f)
+            f.close()
+            print("创建文件")
+            self.writeJson()
