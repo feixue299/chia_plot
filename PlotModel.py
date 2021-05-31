@@ -1,20 +1,24 @@
+import json
+from json import JSONEncoder
+
 TimeInterval = 1
 ProgressInterval = 2
 
 
 class PlotModel:
-    plot_total: int = 0
-    plotting_number: int = 0
-    launch_interval: int = 0
-    interval_type: int = TimeInterval
-    finger_print: str = ''
-    farmer_public_key: str = ''
-    pool_public_key: str = ''
-    k_size: int = 32
-    ram: int = 3390
-    threads: int = 2
-    temp_dir: str = ''
-    final_dir: str = ''
+    def __init__(self):
+        self.plot_total: int = 0
+        self.plotting_number: int = 0
+        self.launch_interval: int = 0
+        self.interval_type: int = TimeInterval
+        self.finger_print: str = ''
+        self.farmer_public_key: str = ''
+        self.pool_public_key: str = ''
+        self.k_size: int = 32
+        self.ram: int = 3390
+        self.threads: int = 2
+        self.temp_dir: str = ''
+        self.final_dir: str = ''
 
     def check(self):
         if self.plot_total > 0 and \

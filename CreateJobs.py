@@ -1,9 +1,11 @@
+import json
 import os
 import platform
 import re
 
 import wx
 
+from JobsModel import JobsModel
 from PlotModel import PlotModel, ProgressInterval, TimeInterval
 
 
@@ -52,12 +54,47 @@ class CreateJobs(wx.Dialog):
             self.model.plotting_number = int(self.plot_info.plotting_total_text_ctrl.Value)
             self.model.launch_interval = int(self.plot_info.launch_interval_text_ctrl.Value)
             self.model.interval_type = TimeInterval if self.plot_info.time_radio_button.Value else ProgressInterval
+            self.model.finger_print = self.wallet.finger_text_ctrl.Value
+            self.model.farmer_public_key = self.wallet.farmer_text_ctrl.Value
+            self.model.pool_public_key = self.wallet.pool_text_ctrl.Value
+            self.model.k_size = int(self.plot_parameter.k_text_ctrl.Value)
+            self.model.ram = int(self.plot_parameter.ram_text_ctrl.Value)
+            self.model.threads = int(self.plot_parameter.threads_text_ctrl.Value)
+            self.model.temp_dir = self.directories.temp_text_ctrl.Value
+            self.model.final_dir = self.directories.final_text_ctrl.Value
+        except BaseException as error:
+            wx.MessageBox("提示", str(error), wx.OK | wx.ICON_INFORMATION)
+
+        finally:
             if self.model.check():
-                wx.MessageBox("提示", "信息完整", wx.OK | wx.ICON_INFORMATION)
+                self.writeJson()
+                self.Close()
             else:
                 wx.MessageBox("提示", "信息不完整", wx.OK | wx.ICON_INFORMATION)
-        except ValueError as error:
-            wx.MessageBox("提示", str(error), wx.OK | wx.ICON_INFORMATION)
+
+    def writeJson(self):
+        path = "config.json"
+        try:
+            if os.path.exists(path):
+                with open(path, "r+") as f:
+                    read = f.read()
+                    load_dir = json.loads(read)
+                    load_dir["jobs"] = load_dir["jobs"] + [self.model.__dict__]
+                    f.close()
+                with open(path, "w+") as f:
+                    json.dump(load_dir, f)
+                    f.close()
+            else:
+                self.createFile(path)
+        except FileNotFoundError as error:
+            self.createFile(path)
+
+    def createFile(self, path):
+        with open(path, "w+") as f:
+            json.dump(JobsModel().__dict__, f)
+            f.close()
+            print("创建文件")
+            self.writeJson()
 
 
 class PlotInfo(wx.Panel):
@@ -101,33 +138,32 @@ class Wallet(wx.Panel):
         wallet_box = wx.StaticBox(self, label="钱包信息")
         wallet_box_sizer = wx.StaticBoxSizer(wallet_box, wx.HORIZONTAL)
 
-        title_v_box = wx.BoxSizer(wx.VERTICAL)
+        grid = wx.FlexGridSizer(3, 3, 5, 5)
 
-        for title in ["指纹:", "农场公钥:", "矿池公钥:"]:
-            text = wx.StaticText(self, label=title)
-            title_v_box.Add(text, 0)
-
-        text_ctrl_v_box = wx.BoxSizer(wx.VERTICAL)
+        text = wx.StaticText(self, label="指纹:")
         self.finger_text_ctrl = wx.TextCtrl(self)
-        self.farmer_text_ctrl = wx.TextCtrl(self)
-        self.pool_text_ctrl = wx.TextCtrl(self)
-
-        text_ctrl_v_box.Add(self.finger_text_ctrl, 1, wx.EXPAND)
-        text_ctrl_v_box.Add(self.farmer_text_ctrl, 1, wx.EXPAND)
-        text_ctrl_v_box.Add(self.pool_text_ctrl, 1, wx.EXPAND)
-
-        v_box = wx.BoxSizer(wx.VERTICAL)
         default_button = wx.Button(self, label="自动获取钱包")
+        grid.Add(text, 0)
+        grid.Add(self.finger_text_ctrl, 1, wx.EXPAND)
+        grid.Add(default_button)
+
+        text = wx.StaticText(self, label="农场公钥:")
+        self.farmer_text_ctrl = wx.TextCtrl(self)
         custom_button = wx.Button(self, label="选择钱包")
+        grid.Add(text, 0)
+        grid.Add(self.farmer_text_ctrl, 1, wx.EXPAND)
+        grid.Add(custom_button)
+
+        text = wx.StaticText(self, label="矿池公钥:")
+        self.pool_text_ctrl = wx.TextCtrl(self)
+        grid.Add(text, 0)
+        grid.Add(self.pool_text_ctrl, 1, wx.EXPAND)
+
+        grid.AddGrowableCol(1, 1)
 
         default_button.Bind(wx.EVT_BUTTON, self.auto_get_wallte)
 
-        v_box.Add(default_button)
-        v_box.Add(custom_button)
-
-        wallet_box_sizer.Add(title_v_box, 0)
-        wallet_box_sizer.Add(text_ctrl_v_box, 1, wx.EXPAND)
-        wallet_box_sizer.Add(v_box, 0)
+        wallet_box_sizer.Add(grid, 1, wx.EXPAND)
 
         self.SetSizer(wallet_box_sizer)
 
@@ -166,22 +202,22 @@ class PlottingParameters(wx.Panel):
         grid_box = wx.GridSizer(2, 4, 5, 5)
 
         k_size = wx.StaticText(self, label="K-size")
-        k_text_ctrl = wx.TextCtrl(self, value="32", style=wx.TE_READONLY)
+        self.k_text_ctrl = wx.TextCtrl(self, value="32", style=wx.TE_READONLY)
 
         grid_box.Add(k_size)
-        grid_box.Add(k_text_ctrl)
+        grid_box.Add(self.k_text_ctrl)
 
         ram = wx.StaticText(self, label="Ram(Mib)")
-        ram_text_ctrl = wx.TextCtrl(self, value="3390")
+        self.ram_text_ctrl = wx.TextCtrl(self, value="3390")
 
         grid_box.Add(ram)
-        grid_box.Add(ram_text_ctrl)
+        grid_box.Add(self.ram_text_ctrl)
 
         threads = wx.StaticText(self, label="线程数")
-        threads_text_ctrl = wx.TextCtrl(self, value="2")
+        self.threads_text_ctrl = wx.TextCtrl(self, value="2")
 
         grid_box.Add(threads)
-        grid_box.Add(threads_text_ctrl)
+        grid_box.Add(self.threads_text_ctrl)
 
         plot_parameter_box_sizer.Add(grid_box, 1, wx.EXPAND)
 
