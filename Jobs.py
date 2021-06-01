@@ -1,9 +1,4 @@
-import json
-import os
-import sys
-
 import wx
-from wx import FileDialog
 
 from CreateJobs import CreateJobs
 from JobsModel import JobsModel
@@ -21,7 +16,10 @@ class Jobs(wx.Panel):
 
         self.job_list = wx.ListCtrl(self, -1, style=wx.LC_REPORT)
         self.job_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_ctrl_select)
-        title_group = ["序号", "缓存磁盘", "缓存磁盘2", "最终磁盘", "间隔", "并发数", "线程数", "内存大小", "待锄地数量", "指纹", "农场公钥", "矿池公钥"]
+        title_group = ["序号", "缓存磁盘", "缓存磁盘2", "最终磁盘",
+                       "间隔", "并发数", "线程数", "内存大小",
+                       "锄地数量", "已完成锄地数量",
+                       "指纹", "农场公钥", "矿池公钥"]
         for index in range(len(title_group)):
             self.job_list.InsertColumn(index, title_group[index])
 
@@ -33,6 +31,7 @@ class Jobs(wx.Panel):
         self.create_button.Bind(wx.EVT_BUTTON, self.create_jobs)
         self.delete_button.Bind(wx.EVT_BUTTON, self.delete_jobs)
         v_box.Add(self.create_button)
+        v_box.AddSpacer(20)
         v_box.Add(self.delete_button)
         h_box.Add(v_box, 0, wx.ALIGN_CENTER_VERTICAL)
 
@@ -61,13 +60,14 @@ class Jobs(wx.Panel):
 
         self.jobs_model: JobsModel = JobsModel.readFromFile()
 
-        for index in range(0, len(self.jobs_model.jobs)):
+        for index in range(len(self.jobs_model.jobs)):
             job: PlotModel = self.jobs_model.jobs[index]
             index = self.job_list.InsertItem(self.job_list.GetItemCount(), str(self.job_list.GetItemCount() + 1))
-            str_group = [job.temp_dir, "无", job.final_dir, str(job.plotting_number),
+            str_group = [job.temp_dir, "无", job.final_dir,
                          str(job.launch_interval) + str("分钟" if job.interval_type == TimeInterval else "%"),
-                         str(job.threads),
-                         str(job.ram), str(job.plot_total), job.finger_print, job.farmer_public_key, job.pool_public_key]
+                         str(job.plotting_number), str(job.threads), str(job.ram),
+                         str(job.plot_total), str(job.plotting_finish),
+                         job.finger_print, job.farmer_public_key, job.pool_public_key]
 
             for column in range(len(str_group)):
-                self.job_list.SetItem(index, column, str_group[column])
+                self.job_list.SetItem(index, column + 1, str_group[column])

@@ -1,15 +1,20 @@
 import wx
 
 from Jobs import Jobs
+from PlottingList import PlottingList
 
 
 class Panel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent=parent, id=-1)
-        v_box = wx.BoxSizer(wx.VERTICAL)
-        jobs_panel = Jobs(self)
 
+        v_box = wx.BoxSizer(wx.VERTICAL)
+
+        jobs_panel = Jobs(self)
         v_box.Add(jobs_panel, 0, wx.EXPAND)
+
+        plotting = PlottingList(self)
+        v_box.Add(plotting, 0, wx.EXPAND)
 
         self.SetSizer(v_box)
 

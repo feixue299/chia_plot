@@ -10,6 +10,7 @@ class PlotModel:
         super(PlotModel, self).__init__()
         self.plot_total: int = 0
         self.plotting_number: int = 0
+        self.plotting_finish: int = 0
         self.launch_interval: int = 0
         self.interval_type: int = TimeInterval
         self.finger_print: str = ''

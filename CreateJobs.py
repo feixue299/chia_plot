@@ -50,18 +50,18 @@ class CreateJobs(wx.Dialog):
 
     def on_ok(self, e):
         try:
-            self.model.plot_total = int(self.plot_info.plot_total_text_ctrl.Value)
-            self.model.plotting_number = int(self.plot_info.plotting_total_text_ctrl.Value)
-            self.model.launch_interval = int(self.plot_info.launch_interval_text_ctrl.Value)
-            self.model.interval_type = TimeInterval if self.plot_info.time_radio_button.Value else ProgressInterval
-            self.model.finger_print = self.wallet.finger_text_ctrl.Value
-            self.model.farmer_public_key = self.wallet.farmer_text_ctrl.Value
-            self.model.pool_public_key = self.wallet.pool_text_ctrl.Value
-            self.model.k_size = int(self.plot_parameter.k_text_ctrl.Value)
-            self.model.ram = int(self.plot_parameter.ram_text_ctrl.Value)
-            self.model.threads = int(self.plot_parameter.threads_text_ctrl.Value)
-            self.model.temp_dir = self.directories.temp_text_ctrl.Value
-            self.model.final_dir = self.directories.final_text_ctrl.Value
+            self.model.plot_total = int(self.plot_info.plot_total_text_ctrl.GetValue())
+            self.model.plotting_number = int(self.plot_info.plotting_total_text_ctrl.GetValue())
+            self.model.launch_interval = int(self.plot_info.launch_interval_text_ctrl.GetValue())
+            self.model.interval_type = TimeInterval if self.plot_info.time_radio_button.GetValue() else ProgressInterval
+            self.model.finger_print = self.wallet.finger_text_ctrl.GetValue()
+            self.model.farmer_public_key = self.wallet.farmer_text_ctrl.GetValue()
+            self.model.pool_public_key = self.wallet.pool_text_ctrl.GetValue()
+            self.model.k_size = int(self.plot_parameter.k_text_ctrl.GetValue())
+            self.model.ram = int(self.plot_parameter.ram_text_ctrl.GetValue())
+            self.model.threads = int(self.plot_parameter.threads_text_ctrl.GetValue())
+            self.model.temp_dir = self.directories.temp_text_ctrl.GetValue()
+            self.model.final_dir = self.directories.final_text_ctrl.GetValue()
 
         except BaseException as error:
             wx.MessageBox("提示", str(error), wx.OK | wx.ICON_INFORMATION)
