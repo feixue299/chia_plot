@@ -8,6 +8,10 @@ ConfigPath = "config.json"
 
 class JobsModel(object):
 
+    def __init__(self):
+        super(JobsModel, self).__init__()
+        self.jobs = []
+
     def __repr__(self):
         return "[%s]" % self.jobs
 
