@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 
 import wx
 from wx import FileDialog
@@ -7,6 +8,8 @@ from wx import FileDialog
 from CreateJobs import CreateJobs
 from JobsModel import JobsModel
 from PlotModel import PlotModel
+
+ConfigPath = "config.json"
 
 
 class Jobs(wx.Panel):
@@ -19,19 +22,18 @@ class Jobs(wx.Panel):
         h_box = wx.BoxSizer(wx.HORIZONTAL)
 
         self.job_list = wx.ListCtrl(self, -1, style=wx.LC_REPORT)
+        self.job_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_ctrl_select)
         self.job_list.InsertColumn(0, "序号")
         self.job_list.InsertColumn(1, "缓存磁盘")
         self.job_list.InsertColumn(2, "缓存磁盘2")
         self.job_list.InsertColumn(3, "最终磁盘")
         self.job_list.InsertColumn(4, "并发数")
-        self.job_list.InsertColumn(5, "并发中")
-        self.job_list.InsertColumn(6, "线程数")
-        self.job_list.InsertColumn(7, "内存大小")
-        self.job_list.InsertColumn(8, "待锄地数量")
-        self.job_list.InsertColumn(9, "已进行锄地数量")
-        self.job_list.InsertColumn(10, "指纹")
-        self.job_list.InsertColumn(11, "农场公钥")
-        self.job_list.InsertColumn(12, "矿池公钥")
+        self.job_list.InsertColumn(5, "线程数")
+        self.job_list.InsertColumn(6, "内存大小")
+        self.job_list.InsertColumn(7, "待锄地数量")
+        self.job_list.InsertColumn(8, "指纹")
+        self.job_list.InsertColumn(9, "农场公钥")
+        self.job_list.InsertColumn(10, "矿池公钥")
 
         h_box.Add(self.job_list, 1)
 
@@ -52,23 +54,42 @@ class Jobs(wx.Panel):
     def create_jobs(self, event):
         create_jobs = CreateJobs(self)
         create_jobs.ShowModal()
+        self.update_jobs()
+
+    def list_ctrl_select(self, e):
+        item: wx.ListItem = e.GetItem()
+        self.current_item = item
 
     def delete_jobs(self, event):
-        file = FileDialog(self, message="选择单个文件", style=wx.FD_OPEN)
-        file.ShowModal()
+        if self.current_item is not None:
+            del self.jobs_model.jobs[self.current_item.GetId()]
+            self.update_jobs()
 
     def update_jobs(self):
-        path = "config.json"
+        self.job_list.DeleteAllItems()
+
         try:
-            if os.path.exists(path):
-                with open(path, "r") as f:
+            if os.path.exists(ConfigPath):
+                with open(ConfigPath, "r") as f:
                     read = f.read()
                     load_dir = json.loads(read)
-                    print("load_dir:", load_dir)
-                    jobs_model: JobsModel = json.loads(read, object_hook=lambda d: PlotModel(**d))
-                    print("jobs_model.jobs:", jobs_model.jobs)
+                    self.jobs_model: JobsModel = json.loads(read, object_hook=lambda d: PlotModel(**d))
+                    f.close()
+                    for index in range(0, len(self.jobs_model.jobs)):
+                        job: PlotModel = self.jobs_model.jobs[index]
+                        index = self.job_list.InsertItem(self.job_list.GetItemCount(), str(self.job_list.GetItemCount() + 1))
+                        self.job_list.SetItem(index, 1, job.temp_dir)
+                        self.job_list.SetItem(index, 2, "无")
+                        self.job_list.SetItem(index, 3, job.final_dir)
+                        self.job_list.SetItem(index, 4, str(job.plotting_number))
+                        self.job_list.SetItem(index, 5, str(job.threads))
+                        self.job_list.SetItem(index, 6, str(job.ram))
+                        self.job_list.SetItem(index, 7, str(job.plot_total))
+                        self.job_list.SetItem(index, 8, job.finger_print)
+                        self.job_list.SetItem(index, 9, job.farmer_public_key)
+                        self.job_list.SetItem(index, 10, job.pool_public_key)
             else:
-                self.createFile(path)
+                self.createFile(ConfigPath)
         finally:
             pass
 

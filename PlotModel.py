@@ -22,7 +22,7 @@ class PlotModel:
         self.__dict__.update(kwargs)
 
     def __repr__(self):
-        return "<plotModel 锄地总数:%d, 正在锄地数:%d, 启动间隔:%d>" %\
+        return "<plotModel 锄地总数:%d, 正在锄地数:%d, 启动间隔:%d, >" %\
                (self.plot_total, self.plotting_number, self.launch_interval)
 
     def check(self):
