@@ -6,7 +6,8 @@ ProgressInterval = 2
 
 
 class PlotModel:
-    def __init__(self, **kwargs):
+    def __init__(self):
+        super(PlotModel, self).__init__()
         self.plot_total: int = 0
         self.plotting_number: int = 0
         self.launch_interval: int = 0
@@ -19,7 +20,6 @@ class PlotModel:
         self.threads: int = 2
         self.temp_dir: str = ''
         self.final_dir: str = ''
-        self.__dict__.update(kwargs)
 
     def __repr__(self):
         return "<plotModel 锄地总数:%d, 正在锄地数:%d, 启动间隔:%d, >" %\

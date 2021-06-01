@@ -9,8 +9,6 @@ from CreateJobs import CreateJobs
 from JobsModel import JobsModel
 from PlotModel import PlotModel
 
-ConfigPath = "config.json"
-
 
 class Jobs(wx.Panel):
     def __init__(self, parent):
@@ -63,39 +61,25 @@ class Jobs(wx.Panel):
     def delete_jobs(self, event):
         if self.current_item is not None:
             del self.jobs_model.jobs[self.current_item.GetId()]
+            self.jobs_model.writeToDefaultFile()
             self.update_jobs()
 
     def update_jobs(self):
         self.job_list.DeleteAllItems()
 
-        try:
-            if os.path.exists(ConfigPath):
-                with open(ConfigPath, "r") as f:
-                    read = f.read()
-                    load_dir = json.loads(read)
-                    self.jobs_model: JobsModel = json.loads(read, object_hook=lambda d: PlotModel(**d))
-                    f.close()
-                    for index in range(0, len(self.jobs_model.jobs)):
-                        job: PlotModel = self.jobs_model.jobs[index]
-                        index = self.job_list.InsertItem(self.job_list.GetItemCount(), str(self.job_list.GetItemCount() + 1))
-                        self.job_list.SetItem(index, 1, job.temp_dir)
-                        self.job_list.SetItem(index, 2, "无")
-                        self.job_list.SetItem(index, 3, job.final_dir)
-                        self.job_list.SetItem(index, 4, str(job.plotting_number))
-                        self.job_list.SetItem(index, 5, str(job.threads))
-                        self.job_list.SetItem(index, 6, str(job.ram))
-                        self.job_list.SetItem(index, 7, str(job.plot_total))
-                        self.job_list.SetItem(index, 8, job.finger_print)
-                        self.job_list.SetItem(index, 9, job.farmer_public_key)
-                        self.job_list.SetItem(index, 10, job.pool_public_key)
-            else:
-                self.createFile(ConfigPath)
-        finally:
-            pass
+        self.jobs_model: JobsModel = JobsModel.readFromFile()
 
-    def createFile(self, path):
-        with open(path, "w+") as f:
-            json.dump(JobsModel().__dict__, f)
-            f.close()
-            print("创建文件")
-            self.writeJson()
+        for index in range(0, len(self.jobs_model.jobs)):
+            job: PlotModel = self.jobs_model.jobs[index]
+            index = self.job_list.InsertItem(self.job_list.GetItemCount(), str(self.job_list.GetItemCount() + 1))
+            self.job_list.SetItem(index, 1, job.temp_dir)
+            self.job_list.SetItem(index, 2, "无")
+            self.job_list.SetItem(index, 3, job.final_dir)
+            self.job_list.SetItem(index, 4, str(job.plotting_number))
+            self.job_list.SetItem(index, 5, str(job.threads))
+            self.job_list.SetItem(index, 6, str(job.ram))
+            self.job_list.SetItem(index, 7, str(job.plot_total))
+            self.job_list.SetItem(index, 8, job.finger_print)
+            self.job_list.SetItem(index, 9, job.farmer_public_key)
+            self.job_list.SetItem(index, 10, job.pool_public_key)
+

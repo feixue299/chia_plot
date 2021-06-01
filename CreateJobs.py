@@ -62,39 +62,17 @@ class CreateJobs(wx.Dialog):
             self.model.threads = int(self.plot_parameter.threads_text_ctrl.Value)
             self.model.temp_dir = self.directories.temp_text_ctrl.Value
             self.model.final_dir = self.directories.final_text_ctrl.Value
+
         except BaseException as error:
             wx.MessageBox("提示", str(error), wx.OK | wx.ICON_INFORMATION)
-
         finally:
             if self.model.check():
-                self.writeJson()
+                jobs_model = JobsModel.readFromFile()
+                jobs_model.jobs.append(self.model)
+                jobs_model.writeToDefaultFile()
                 self.Close()
             else:
                 wx.MessageBox("提示", "信息不完整", wx.OK | wx.ICON_INFORMATION)
-
-    def writeJson(self):
-        path = "config.json"
-        try:
-            if os.path.exists(path):
-                with open(path, "r+") as f:
-                    read = f.read()
-                    load_dir = json.loads(read)
-                    load_dir["jobs"] = load_dir["jobs"] + [self.model.__dict__]
-                    f.close()
-                with open(path, "w+") as f:
-                    json.dump(load_dir, f)
-                    f.close()
-            else:
-                self.createFile(path)
-        except FileNotFoundError as error:
-            self.createFile(path)
-
-    def createFile(self, path):
-        with open(path, "w+") as f:
-            json.dump(JobsModel().__dict__, f)
-            f.close()
-            print("创建文件")
-            self.writeJson()
 
 
 class PlotInfo(wx.Panel):
