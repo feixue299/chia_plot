@@ -5,6 +5,7 @@ import re
 
 import wx
 
+from ChiaCommand import ChiaCommand
 from JobsModel import JobsModel
 from PlotModel import PlotModel, ProgressInterval, TimeInterval
 
@@ -146,14 +147,9 @@ class Wallet(wx.Panel):
         self.SetSizer(wallet_box_sizer)
 
     def auto_get_wallte(self, e):
-        if platform.system().lower() == 'windows':
-            print("windows")
-            cmd = "~\\AppData\\Local\\chia-blockchain\\app-?.?.?\\resources\\app.asar.unpacked\\daemon\\chia.exe" \
-                  "keys show"
-        else:
-            print("mac os")
-            cmd = "/Applications/Chia.app/Contents/Resources/app.asar.unpacked/daemon/chia keys show"
-        cmd_resp = os.popen(cmd)
+        print("chia command:", ChiaCommand.getChiaPath())
+
+        cmd_resp = os.popen(ChiaCommand.getChiaPath() + " keys show ")
         read = cmd_resp.read()
         finger_print = re.search('Fingerprint: (.*)', read)
         farmer_key = re.search('Farmer public key (.*): (.*)', read)
