@@ -6,15 +6,19 @@ import platform
 class ChiaCommand:
     @staticmethod
     def getChiaPath():
+        return  ChiaCommand.getChiaLocationPath() + "chia"
+
+    @staticmethod
+    def getChiaLocationPath():
         if platform.system().lower() == 'windows':
             print("windows")
             path = os.getenv('LOCALAPPDATA')
-            chia_path = path + "\\chia-blockchain\\app-?.?.?\\resources\\app.asar.unpacked\\daemon\\chia"
+            chia_path = path + "\\chia-blockchain\\app-?.?.?\\resources\\app.asar.unpacked\\daemon\\"
             result = ChiaCommand.search(chia_path, ".exe")
             return result[0] if len(result) > 0 else None
         else:
             print("mac os")
-            return "/Applications/Chia.app/Contents/Resources/app.asar.unpacked/daemon/chia"
+            return "/Applications/Chia.app/Contents/Resources/app.asar.unpacked/daemon/"
 
     @staticmethod
     def search(files, file_format='.png'):

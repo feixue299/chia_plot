@@ -1,7 +1,9 @@
 import wx
 
+from ChiaCommand import ChiaCommand
 from Jobs import Jobs
 from PlottingList import PlottingList
+from PlottingManager import PlottingManager
 
 
 class Panel(wx.Panel):
@@ -39,4 +41,5 @@ class App(wx.App):
 
 if __name__ == '__main__':
     app = App()
+    # PlottingManager.testPath()
     app.MainLoop()
