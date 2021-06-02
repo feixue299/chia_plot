@@ -6,7 +6,7 @@ import platform
 class ChiaCommand:
     @staticmethod
     def getChiaPath():
-        return  ChiaCommand.getChiaLocationPath() + "chia"
+        return ChiaCommand.getChiaLocationPath() + "chia"
 
     @staticmethod
     def getChiaLocationPath():

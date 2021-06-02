@@ -3,6 +3,7 @@ import os
 
 from PlotModel import PlotModel
 
+ConfigDirPath = "Config"
 ConfigPath = "config.json"
 
 
@@ -16,10 +17,13 @@ class JobsModel(object):
         return "[%s]" % self.jobs
 
     def writeToDefaultFile(self):
-        self.writeToCustomFile(ConfigPath)
+        self.writeToCustomFile(ConfigDirPath, ConfigPath)
 
-    def writeToCustomFile(self, path):
-        with open(path, "w+") as f:
+    def writeToCustomFile(self, dir_path, path):
+        if not os.path.exists(dir_path):
+            os.mkdir(dir_path)
+
+        with open(os.path.join(dir_path, path), "w+") as f:
             model_dir = {"jobs": []}
 
             for job in self.jobs:
@@ -31,8 +35,8 @@ class JobsModel(object):
     @staticmethod
     def readFromFile():
         try:
-            if os.path.exists(ConfigPath):
-                with open(ConfigPath, "r") as f:
+            if os.path.exists(os.path.join(ConfigDirPath, ConfigPath)):
+                with open(os.path.join(ConfigDirPath, ConfigPath), "r") as f:
                     read = f.read()
                     load_dir = json.loads(read)
                     jobs_model = JobsModel()

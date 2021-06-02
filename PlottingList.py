@@ -1,12 +1,5 @@
-import os
-import subprocess
-import platform
-
 import wx
-
-from ChiaCommand import ChiaCommand
-from JobsModel import JobsModel
-from PlotModel import PlotModel
+from PlottingManager import start_manager
 
 
 class PlottingList(wx.Panel):
@@ -57,18 +50,4 @@ class PlottingList(wx.Panel):
     def start_button_click(self, e):
         self.stop_button.Enable()
         self.start_button.Disable()
-        jobs_model = JobsModel.readFromFile()
-
-        first_job: PlotModel = jobs_model.jobs[0]
-        args = ["chia", "plots", "create", "-k", str(first_job.k_size),
-                "-b", str(first_job.ram),
-                "-n", str(first_job.plot_total),
-                "-r", str(first_job.threads),
-                "-t", first_job.temp_dir,
-                "-d", first_job.final_dir]
-
-        output = open('config_plot1.txt', 'w')
-        os.chdir(ChiaCommand.getChiaLocationPath())
-        out = subprocess.Popen(args=args, stdout=output)
-        print("pid:", out.pid)
-        print("command:", out.args)
+        start_manager()
