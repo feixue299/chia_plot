@@ -4,6 +4,7 @@ import platform
 
 import wx
 
+from ChiaCommand import ChiaCommand
 from JobsModel import JobsModel
 from PlotModel import PlotModel
 
@@ -57,12 +58,7 @@ class PlottingList(wx.Panel):
         self.stop_button.Enable()
         self.start_button.Disable()
         jobs_model = JobsModel.readFromFile()
-        if platform.system().lower() == 'windows':
-            print("windows")
-            cmd = "~\\AppData\\Local\\chia-blockchain\\app-?.?.?\\resources\\app.asar.unpacked\\daemon\\chia.exe"
-        else:
-            print("mac os")
-            cmd = "/Applications/Chia.app/Contents/Resources/app.asar.unpacked/daemon/chia"
+        cmd = ChiaCommand.getChiaPath()
         first_job: PlotModel = jobs_model.jobs[0]
         cmd += " plots create -k " + str(first_job.k_size) + \
                " -b " + str(first_job.ram) + \
