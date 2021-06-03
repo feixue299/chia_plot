@@ -29,6 +29,12 @@ class Frame(wx.Frame):
         self.Centre()
         panel.Fit()
         self.Show()
+        self.Bind(wx.EVT_CLOSE, self.onClose)
+
+    def onClose(self, e):
+        m = wx.MessageBox("是否要关闭窗口", "确认", wx.CANCEL |wx.OK |wx.ICON_QUESTION)
+        if m == wx.OK:
+            self.Destroy()
 
 
 class App(wx.App):
