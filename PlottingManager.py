@@ -25,30 +25,38 @@ class PlottingModel:
         self.job: PlotModel = job
         self.progress: float = 0
         self.filePath = ""
+        self.pid = None
 
     def start(self):
-        args = ["chia", "plots", "create",
+        args = ["plots", "create",
                 "-k", str(self.job.k_size),
                 "-b", str(self.job.ram),
                 "-r", str(self.job.threads),
                 "-t", self.job.temp_dir,
                 "-d", self.job.final_dir]
 
-        self.filePath = "job_create:" + self.job.create_date + "plotting_create:" + self.create_time
-        output = open(os.path.join(PlottingPath, self.filePath), 'w')
-        os.chdir(ChiaCommand.getChiaLocationPath())
-        out = subprocess.Popen(args=args, stdout=output)
-        print("pid:", out.pid)
-        print("command:", out.args)
+        self.filePath = "plotting_log_job_create_" + self.job.create_date +\
+                        "_plotting_create_" + self.create_time + ".log"
+        path = os.path.join(PlottingPath, self.filePath)
+        print("path:", path)
+        with open(path, 'w') as f:
+            cmd = [ChiaCommand.getChiaPath()] + args
+            out = subprocess.Popen(args=cmd, stdout=f, shell=True)
+            f.close()
+            self.pid = out.pid
+            print("pid:", out.pid)
+            print("command:", out.args)
+
         b = threading.Thread(name=self.filePath, target=self.background)
         b.start()
 
     def background(self):
         while self.progress < 1:
-            log_file = open(os.path.join(PlottingPath, self.filePath), "rU")
-            percent = log_file.readlines() / 2600
-            self.progress = min(percent, 1)
             time.sleep(5)
+            log_file = open(os.path.join(PlottingPath, self.filePath), "r")
+            percent = len(log_file.readlines()) / 2600
+            self.progress = min(percent, 1)
+            log_file.close()
 
 
 class PlottingManager:
@@ -67,16 +75,33 @@ class PlottingManager:
     def createPlotting(self):
         while self.plotting:
             jobsDict = self.getJobsDict()
-            for job in jobsDict:
-                job: PlotModel
-                job_plotting_group = self.jobs_plotting_dict.get(job.create_date, [])
-                if job.plotting_number > len(job_plotting_group):
-                    new_plotting = PlottingModel(job)
+            print("当前并发锄地数:", len(self.plottings))
+            print("当前并发情况：", self.getCurrentPlottingStatus())
+            for key, value in jobsDict.items():
+                value: PlotModel
+                job_plotting_group = self.jobs_plotting_dict.get(key, [])
+                if value.plotting_number > len(job_plotting_group):
+                    new_plotting = PlottingModel(value)
                     self.plottings.append(new_plotting)
                     job_plotting_group.append(new_plotting)
-                    self.jobs_plotting_dict[job.create_date] = job_plotting_group
+                    self.jobs_plotting_dict[key] = job_plotting_group
                     new_plotting.start()
+                    time.sleep(5)
+                for plotting in job_plotting_group:
+                    if plotting.progress >= 1:
+                        job_plotting_group.remove(plotting)
+
             time.sleep(5)
+
+    def getCurrentPlottingStatus(self):
+        status = {}
+        for key, value in self.jobs_plotting_dict.items():
+            progress_group = []
+            for model in value:
+                model: PlottingModel
+                progress_group.append(model.progress)
+            status[key] = progress_group
+        return status
 
     def getJobsDict(self):
         jobsDict = {}
@@ -100,7 +125,6 @@ class PlottingManager:
     def createManagerFile(dir_path):
         file = open(os.path.join(dir_path, "PlottingManager.json"), "r")
         read = file.read()
-        print("file:", file)
         file.close()
         return read
 

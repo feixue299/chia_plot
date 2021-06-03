@@ -41,5 +41,4 @@ class App(wx.App):
 
 if __name__ == '__main__':
     app = App()
-    PlottingManager.createManager()
     app.MainLoop()
