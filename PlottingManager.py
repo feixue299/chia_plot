@@ -41,7 +41,11 @@ class PlottingModel:
         print("path:", path)
         with open(path, 'w') as f:
             cmd = [ChiaCommand.getChiaPath()] + args
-            out = subprocess.Popen(args=cmd, stdout=f, shell=True)
+            out = subprocess.Popen(args=cmd,
+                                   stdout=f,
+                                   shell=True,
+                                   stdin=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
             f.close()
             self.pid = out.pid
             print("pid:", out.pid)
@@ -66,6 +70,7 @@ class PlottingManager:
         self.plottings: [PlottingModel] = []
         self.jobs_plotting_dict = {}
         self.plotting = False
+        PlottingManager.createManager()
 
     def startPlotting(self):
         self.plotting = True
@@ -130,11 +135,8 @@ class PlottingManager:
 
     @staticmethod
     def createManager():
-        if os.path.exists(PlottingPath):
-            return PlottingManager.createManagerFile(PlottingPath)
-        else:
+        if not os.path.exists(PlottingPath):
             os.mkdir(PlottingPath)
-            return PlottingManager.createManagerFile(PlottingPath)
 
     @staticmethod
     def createManagerFile(dir_path):

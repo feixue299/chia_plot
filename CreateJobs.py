@@ -2,6 +2,7 @@ import json
 import os
 import platform
 import re
+import subprocess
 
 import wx
 
@@ -128,7 +129,7 @@ class Wallet(wx.Panel):
 
         text = wx.StaticText(self, label="农场公钥:")
         self.farmer_text_ctrl = wx.TextCtrl(self)
-        custom_button = wx.Button(self, label="选择钱包")
+        custom_button = wx.StaticText(self)
         grid.Add(text, 0)
         grid.Add(self.farmer_text_ctrl, 1, wx.EXPAND)
         grid.Add(custom_button)
@@ -149,21 +150,27 @@ class Wallet(wx.Panel):
     def auto_get_wallte(self, e):
         print("chia command:", ChiaCommand.getChiaPath())
 
-        cmd_resp = os.popen(ChiaCommand.getChiaPath() + " keys show ")
-        read = cmd_resp.read()
-        finger_print = re.search('Fingerprint: (.*)', read)
-        farmer_key = re.search('Farmer public key (.*): (.*)', read)
-        pool_key = re.search('Pool public key (.*): (.*)', read)
+        cmd_resp = subprocess.Popen(args=[ChiaCommand.getChiaPath(), "keys", "show"],
+                                    shell=True,
+                                    stdin=subprocess.PIPE,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+        read = str(cmd_resp.stdout.read())
+
+        print("read:", read)
+        finger_print = re.search('Fingerprint: (\\w*)', read)
+        farmer_key = re.search('Farmer public key [()\\w\\d/]*: (\\w*)', read)
+        pool_key = re.search('Pool public key [()\\w\\d/]*: (\\w*)', read)
 
         if finger_print:
             print("Fingerprint:", finger_print.group(1))
             self.finger_text_ctrl.SetLabel(finger_print.group(1))
         if farmer_key:
-            print("Farmer public key:", farmer_key.group(2))
-            self.farmer_text_ctrl.SetLabel(farmer_key.group(2))
+            print("Farmer public key:", farmer_key.group(1))
+            self.farmer_text_ctrl.SetLabel(farmer_key.group(1))
         if pool_key:
-            print("Pool public key:", pool_key.group(2))
-            self.pool_text_ctrl.SetLabel(pool_key.group(2))
+            print("Pool public key:", pool_key.group(1))
+            self.pool_text_ctrl.SetLabel(pool_key.group(1))
 
 
 class PlottingParameters(wx.Panel):

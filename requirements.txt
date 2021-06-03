@@ -1,4 +1,13 @@
+altgraph==0.17
+cx-Logging==3.0
+future==0.18.2
+importlib-metadata==4.4.0
 numpy==1.20.3
+pefile==2021.5.24
 Pillow==8.2.0
+pyinstaller==4.3
+pyinstaller-hooks-contrib==2021.1
+pywin32-ctypes==0.2.0
 six==1.16.0
 wxPython==4.1.1
+zipp==3.4.1
