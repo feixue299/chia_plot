@@ -78,9 +78,10 @@ class PlottingList(wx.Panel):
 
         for plotting in plotting_manager.plottings:
             plotting: PlottingModel
-            index = self.plotting_list \
+            item_index = self.plotting_list \
                 .InsertItem(self.plotting_list.GetItemCount(),
                             str(self.plotting_list.GetItemCount() + 1))
+            print("self.plotting_list.GetItemCount():", item_index)
             job_index = 1
 
             # 查找配置表中序号
@@ -103,11 +104,11 @@ class PlottingList(wx.Panel):
                                              _time.localtime(int(plotting.create_time)))
             str_group = [str(job_index),
                          str(concurrence_index),
-                         "%.3f" % plotting.progress,
+                         "%.3f" % (plotting.progress * 100) + "%",
                          create_datetime,
                          "",
                          "",
                          str(plotting.pid)]
             print("str_group: ", str_group)
             for column in range(len(str_group)):
-                self.plotting_list.SetItem(index, column + 1, str_group[column])
+                self.plotting_list.SetItem(item_index, column + 1, str_group[column])

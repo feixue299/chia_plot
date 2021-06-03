@@ -5,7 +5,7 @@ import time
 
 from ChiaCommand import ChiaCommand
 from JobsModel import JobsModel
-from PlotModel import PlotModel
+from PlotModel import PlotModel, TimeInterval, ProgressInterval
 
 PlottingPath = "Plotting"
 
@@ -80,13 +80,28 @@ class PlottingManager:
             for key, value in jobsDict.items():
                 value: PlotModel
                 job_plotting_group = self.jobs_plotting_dict.get(key, [])
-                if value.plotting_number > len(job_plotting_group):
-                    new_plotting = PlottingModel(value)
-                    self.plottings.append(new_plotting)
-                    job_plotting_group.append(new_plotting)
-                    self.jobs_plotting_dict[key] = job_plotting_group
-                    new_plotting.start()
-                    time.sleep(5)
+                plotting_count = len(job_plotting_group)
+                if value.plotting_number > plotting_count:
+                    def create_new_plotting():
+                        new_plotting = PlottingModel(value)
+                        self.plottings.append(new_plotting)
+                        job_plotting_group.append(new_plotting)
+                        self.jobs_plotting_dict[key] = job_plotting_group
+                        new_plotting.start()
+                        time.sleep(5)
+
+                    if plotting_count > 0:
+                        last_plotting: PlottingModel = job_plotting_group[plotting_count - 1]
+
+                        if value.interval_type == TimeInterval and \
+                                time.time() - int(last_plotting.create_time) > value.launch_interval * 60:
+                            create_new_plotting()
+                        elif value.interval_type == ProgressInterval and \
+                                last_plotting.progress * 100 > value.launch_interval:
+                            create_new_plotting()
+                    else:
+                        create_new_plotting()
+
                 for plotting in job_plotting_group:
                     if plotting.progress >= 1:
                         job_plotting_group.remove(plotting)
