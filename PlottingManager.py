@@ -25,7 +25,9 @@ class PlottingModel:
         self.job: PlotModel = job
         self.progress: float = 0
         self.filePath = ""
-        self.pid = None
+        self.end_time = ""
+        self.pid = ""
+        self.order_number = 1
 
     def start(self):
         args = ["plots", "create",
@@ -61,6 +63,7 @@ class PlottingModel:
             percent = len(log_file.readlines()) / 2600
             self.progress = min(percent, 1)
             log_file.close()
+        self.end_time = str(int(time.time()))
 
 
 class PlottingManager:
@@ -87,25 +90,27 @@ class PlottingManager:
                 job_plotting_group = self.jobs_plotting_dict.get(key, [])
                 plotting_count = len(job_plotting_group)
                 if value.plotting_number > plotting_count:
-                    def create_new_plotting():
+                    def create_new_plotting(order_number):
                         new_plotting = PlottingModel(value)
+                        new_plotting.order_number = order_number
                         self.plottings.append(new_plotting)
                         job_plotting_group.append(new_plotting)
                         self.jobs_plotting_dict[key] = job_plotting_group
                         new_plotting.start()
                         time.sleep(5)
 
+                    order_number = 1
                     if plotting_count > 0:
                         last_plotting: PlottingModel = job_plotting_group[plotting_count - 1]
-
+                        order_number = (last_plotting.order_number + 1) % plotting_count
                         if value.interval_type == TimeInterval and \
                                 time.time() - int(last_plotting.create_time) > value.launch_interval * 60:
-                            create_new_plotting()
+                            create_new_plotting(order_number)
                         elif value.interval_type == ProgressInterval and \
                                 last_plotting.progress * 100 > value.launch_interval:
-                            create_new_plotting()
+                            create_new_plotting(order_number)
                     else:
-                        create_new_plotting()
+                        create_new_plotting(order_number)
 
                 for plotting in job_plotting_group:
                     if plotting.progress >= 1:

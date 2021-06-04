@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import time, datetime, timedelta
 import threading
 import time as _time
 
@@ -21,7 +21,7 @@ class PlottingList(wx.Panel):
         self.plotting_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_ctrl_select)
 
         title_group = ["序号", "配置序号", "并发序号",
-                       "进度", "开始时间", "结束时间", "总耗时",
+                       "进度", "开始时间", "总耗时", "结束时间",
                        "PID"]
 
         for index in range(len(title_group)):
@@ -91,23 +91,22 @@ class PlottingList(wx.Panel):
                     job_index = index + 1
                     break
 
-            # 查找当前并发的序号
-            concurrence_index = 1
-            plotting_group = plotting_manager.jobs_plotting_dict.get(plotting.job.create_date, [])
-            for index in range(len(plotting_group)):
-                p: PlottingModel = plotting_group[index]
-                if plotting.create_time == p.create_time:
-                    concurrence_index = index + 1
-                    break
-
             create_datetime = _time.strftime('%Y-%m-%d %H:%M:%S',
                                              _time.localtime(int(plotting.create_time)))
+
+            end_time = int(_time.time())
+            if len(plotting.end_time) > 0:
+                end_time = int(plotting.end_time)
+
+            time_interval = datetime.fromtimestamp(end_time) - datetime.fromtimestamp(int(plotting.create_time))
+            consumption_time = str(time_interval)
+            print("consumption_time：", end_time - int(plotting.create_time))
             str_group = [str(job_index),
-                         str(concurrence_index),
+                         str(plotting.order_number),
                          "%.3f" % (plotting.progress * 100) + "%",
                          create_datetime,
-                         "",
-                         "",
+                         consumption_time,
+                         plotting.end_time,
                          str(plotting.pid)]
             print("str_group: ", str_group)
             for column in range(len(str_group)):
