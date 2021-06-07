@@ -95,8 +95,11 @@ class PlottingList(wx.Panel):
                                              _time.localtime(int(plotting.create_time)))
 
             end_time = int(_time.time())
+            finish_time = ""
             if len(plotting.end_time) > 0:
                 end_time = int(plotting.end_time)
+                finish_time = _time.strftime('%Y-%m-%d %H:%M:%S',
+                                             _time.localtime(int(plotting.end_time)))
 
             time_interval = datetime.fromtimestamp(end_time) - datetime.fromtimestamp(int(plotting.create_time))
             consumption_time = str(time_interval)
@@ -106,7 +109,7 @@ class PlottingList(wx.Panel):
                          "%.3f" % (plotting.progress * 100) + "%",
                          create_datetime,
                          consumption_time,
-                         plotting.end_time,
+                         finish_time,
                          str(plotting.pid)]
             print("str_group: ", str_group)
             for column in range(len(str_group)):

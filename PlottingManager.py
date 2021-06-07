@@ -90,9 +90,9 @@ class PlottingManager:
                 job_plotting_group = self.jobs_plotting_dict.get(key, [])
                 plotting_count = len(job_plotting_group)
                 if value.plotting_number > plotting_count:
-                    def create_new_plotting(order_number):
+                    def create_new_plotting(orderNumber):
                         new_plotting = PlottingModel(value)
-                        new_plotting.order_number = order_number
+                        new_plotting.order_number = orderNumber
                         self.plottings.append(new_plotting)
                         job_plotting_group.append(new_plotting)
                         self.jobs_plotting_dict[key] = job_plotting_group
