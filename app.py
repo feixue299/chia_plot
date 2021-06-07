@@ -23,7 +23,7 @@ class Panel(wx.Panel):
 
 class Frame(wx.Frame):
     def __init__(self):
-        wx.Frame.__init__(self, parent=None, title=u'chia', size=(1000, 600),
+        wx.Frame.__init__(self, parent=None, title=u'chia p盘交流群：766168454', size=(1000, 600),
                           style=wx.DEFAULT_FRAME_STYLE ^ wx.MAXIMIZE_BOX)
         panel = Panel(self)
         self.Centre()
