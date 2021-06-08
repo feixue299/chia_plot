@@ -73,44 +73,49 @@ class PlottingList(wx.Panel):
 
     def update_dataSource(self):
         print("update_dataSource")
-        self.plotting_list.DeleteAllItems()
-        jobs = JobsModel.readFromFile().jobs
 
-        for plotting in plotting_manager.plottings:
-            plotting: PlottingModel
+        for itemIndex in range(self.plotting_list.GetItemCount()):
+            self.updateItem(itemIndex)
+
+        for itemIndex in range(len(plotting_manager.plottings) - self.plotting_list.GetItemCount()):
             item_index = self.plotting_list \
                 .InsertItem(self.plotting_list.GetItemCount(),
                             str(self.plotting_list.GetItemCount() + 1))
             print("self.plotting_list.GetItemCount():", item_index)
-            job_index = 1
+            self.updateItem(itemIndex)
 
-            # 查找配置表中序号
-            for index in range(len(jobs)):
-                plot_model: PlotModel = jobs[index]
-                if plot_model.create_date == plotting.job.create_date:
-                    job_index = index + 1
-                    break
+    def updateItem(self, item_index):
+        jobs = JobsModel.readFromFile().jobs
+        job_index = 1
+        plotting = plotting_manager.plottings[item_index]
 
-            create_datetime = _time.strftime('%Y-%m-%d %H:%M:%S',
-                                             _time.localtime(int(plotting.create_time)))
+        # 查找配置表中序号
+        for index in range(len(jobs)):
+            plot_model: PlotModel = jobs[index]
+            if plot_model.create_date == plotting.job.create_date:
+                job_index = index + 1
+                break
 
-            end_time = int(_time.time())
-            finish_time = ""
-            if len(plotting.end_time) > 0:
-                end_time = int(plotting.end_time)
-                finish_time = _time.strftime('%Y-%m-%d %H:%M:%S',
-                                             _time.localtime(int(plotting.end_time)))
+        create_datetime = _time.strftime('%Y-%m-%d %H:%M:%S',
+                                         _time.localtime(int(plotting.create_time)))
 
-            time_interval = datetime.fromtimestamp(end_time) - datetime.fromtimestamp(int(plotting.create_time))
-            consumption_time = str(time_interval)
-            print("consumption_time：", end_time - int(plotting.create_time))
-            str_group = [str(job_index),
-                         str(plotting.order_number),
-                         "%.3f" % (plotting.progress * 100) + "%",
-                         create_datetime,
-                         consumption_time,
-                         finish_time,
-                         str(plotting.pid)]
-            print("str_group: ", str_group)
-            for column in range(len(str_group)):
-                self.plotting_list.SetItem(item_index, column + 1, str_group[column])
+        end_time = int(_time.time())
+        finish_time = ""
+        if len(plotting.end_time) > 0:
+            end_time = int(plotting.end_time)
+            finish_time = _time.strftime('%Y-%m-%d %H:%M:%S',
+                                         _time.localtime(int(plotting.end_time)))
+
+        time_interval = datetime.fromtimestamp(end_time) - datetime.fromtimestamp(int(plotting.create_time))
+        consumption_time = str(time_interval)
+        print("consumption_time：", end_time - int(plotting.create_time))
+        str_group = [str(job_index),
+                     str(plotting.order_number),
+                     "%.3f" % (plotting.progress * 100) + "%",
+                     create_datetime,
+                     consumption_time,
+                     finish_time,
+                     str(plotting.pid)]
+        print("str_group: ", str_group)
+        for column in range(len(str_group)):
+            self.plotting_list.SetItem(item_index, column + 1, str_group[column])
