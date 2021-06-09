@@ -102,7 +102,7 @@ class PlottingManager:
                     order_number = 1
                     if plotting_count > 0:
                         last_plotting: PlottingModel = job_plotting_group[plotting_count - 1]
-                        order_number = (last_plotting.order_number + 1) % value.plotting_number
+                        order_number = (last_plotting.order_number % value.plotting_number) + 1
                         if value.interval_type == TimeInterval and \
                                 time.time() - int(last_plotting.create_time) > value.launch_interval * 60:
                             create_new_plotting(order_number)
