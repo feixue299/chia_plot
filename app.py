@@ -16,7 +16,7 @@ class Panel(wx.Panel):
         v_box.Add(jobs_panel, 0, wx.EXPAND)
 
         plotting = PlottingList(self)
-        v_box.Add(plotting, 0, wx.EXPAND)
+        v_box.Add(plotting, 1, wx.EXPAND)
 
         self.SetSizer(v_box)
 
